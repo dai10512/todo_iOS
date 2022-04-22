@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:todo/model/todo.dart';
 import 'package:todo/stateController.dart';
 
 void main() => runApp(const ProviderScope(child: MyApp()));
@@ -16,7 +15,7 @@ class MyApp extends ConsumerWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'TODOアプリ'),
     );
   }
 }
@@ -28,6 +27,8 @@ class MyHomePage extends ConsumerWidget {
 
   @override
   Widget build(context, ref) {
+    final newTodoController = TextEditingController();
+
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Container(
@@ -35,42 +36,95 @@ class MyHomePage extends ConsumerWidget {
         child: Consumer(
           builder: (context, ref, child) {
             final todoList = ref.watch(todoListStateController);
-            print(todoList.todos.length);
 
             return Center(
-              child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-                TextFormField(
-                  enabled: true,
-                  maxLength: 20,
-                  obscureText: false,
-                  decoration: const InputDecoration(labelText: "新規TODO"),
-                  onTap: () {
-                    ref.read(todoListStateController.notifier).add;
-                    print('pushed');
-                  },
-                ),
-                Flexible(
-                  child: ListView.builder(
-                    itemCount: todoList.todos.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return const Card(
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            child: Icon(Icons.face),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Flexible(
+                    child: ListView.builder(
+                      itemCount: todoList.todos.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Dismissible(
+                          direction: DismissDirection.endToStart,
+                          key: Key(title),
+                          background: Container(
+                            padding: EdgeInsets.all(15),
+                            alignment: AlignmentDirectional.centerEnd,
+                            color: Colors.red,
+                            child: Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                )
-              ]),
+                          onDismissed: (direction) {
+                            ref.read(todoListStateController.notifier).deleteTodo(todoList.todos[index].id.toString());
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('dismissed')));
+                            // print(todoList.todos.length);
+                          },
+                          child: Card(
+                            child: ListTile(
+                              title: Text(todoList.todos[index].title.toString()),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                ],
+              ),
             );
           },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          // ref.read(todoListStateController.notifier).update();
+          await aaa(context, ref, newTodoController);
+        },
       ),
     );
   }
 }
 
-
-    // final ColorState colorProvider = ref.watch(colorStateController);
+Future aaa(context, ref, newTodoController) {
+  return showModalBottomSheet(
+    context: context,
+    builder: (context) {
+      return Container(
+        height: 100,
+        // padding: EdgeInsets.all(30),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: TextFormField(
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                controller: newTodoController,
+                decoration: const InputDecoration(labelText: "新規TODO"),
+              ),
+            ),
+            MaterialButton(
+              child: const Text('新規登録'),
+              onPressed: () {
+                var title = newTodoController.text;
+                ref.read(todoListStateController.notifier).add(title);
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("'$title'を新規登録しました"),
+                  ),
+                );
+                newTodoController.clear();
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}

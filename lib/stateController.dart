@@ -3,7 +3,7 @@ import 'package:todo/model/todosList.dart';
 import 'package:uuid/uuid.dart';
 import 'package:riverpod/riverpod.dart';
 
-final todoListStateController = StateNotifierProvider<TodosListStateController, TodosList>(
+final todoListStateController = StateNotifierProvider.autoDispose<TodosListStateController, TodosList>(
   (ref) => TodosListStateController(TodosList()),
 );
 
@@ -18,12 +18,32 @@ class TodosListStateController extends StateNotifier<TodosList> {
     final currentState = state;
     final todos = currentState.todos.toList()
       ..add(
-        Todo(id: _uuid.v4(), title: title),
+        Todo(
+          id: _uuid.v4(),
+          title: title,
+        ),
       );
     state = currentState.copyWith(
       todos: todos,
     );
   }
+
+  void deleteTodo(String id) {
+    final newList = state.todos.where((todo) => todo.id != id).toList();
+    state = state.copyWith(todos: newList);
+  }
+
+  void delete(Todo todo) {
+    final currentState = state;
+    final todos = currentState.todos.toList()
+      ..remove(todo
+          // Todo(
+          // id: _uuid.v4(),
+          // title: title,
+          );
+  }
+
+  void update() {}
 }
 
 //   void toggle(Todo todo) {
