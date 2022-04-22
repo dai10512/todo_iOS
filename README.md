@@ -1,6 +1,6 @@
 # todo
 
-A new Flutter project.
+作ったTODOアプリを元にiPhoneのTODOアプリを模写して作ります。
 
 ## Getting Started
 
@@ -15,8 +15,5 @@ For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
-
-
-https://user-images.githubusercontent.com/38497198/164702408-2fc91509-d953-4378-9469-287113b50889.mov
 
 
